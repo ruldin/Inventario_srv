@@ -1,0 +1,66 @@
+﻿@inject IJSRuntime JsRuntime;
+
+<form action="/" method="post">
+<div>
+   <input type="text" required="required" placeholder="Ingrese su usuario" @bind-value="@usuario"/>
+</div>    
+<div>
+    <input type="text" required="required" placeholder="Ingrese su correo" @bind-value="@correo"/>
+</div>
+
+<div>
+    <input type="button" value ="Cambia Texto" @onclick="CambiaTexto" />
+</div>
+<div>
+    <input type="button" value="Login" @onclick="MakeLogin"/>
+</div>
+
+
+
+
+</form>
+
+
+<div>
+    @mensaje
+</div>
+
+@code{
+
+    [Parameter]
+    public string Mensaje { get; set; }
+
+
+    string usuario = "";
+    string correo = "";
+    string mensaje = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //lo carga la primera vez que se cargue
+        mensaje = Mensaje;
+    }
+
+
+
+
+    private void CambiaTexto()
+    {
+        
+    }
+
+
+    private async void MakeLogin()
+    {
+        if (String.IsNullOrEmpty(usuario) || String.IsNullOrEmpty(correo))
+        {
+            //dispara un aler de error
+            await JsRuntime.InvokeVoidAsync("alert", "Correo o usuario no pueden ser nulos");
+        } else
+        {
+            mensaje = $"usuaio: {usuario} correo:{correo}";
+        }
+
+    }
+}

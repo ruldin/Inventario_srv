@@ -1,0 +1,20 @@
+﻿para agregar la migracion
+add-migration FirstMigration
+
+Remove-migration
+
+
+
+update-database
+
+
+
+
+se debe de poner por default el proyecto de dataaccess
+se instalan los paquetes
+
+
+se debe instalar:
+Microsoft.EntityFrameworkCore.tools
+sqlserver
+

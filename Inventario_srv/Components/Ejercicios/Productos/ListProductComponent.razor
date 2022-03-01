@@ -1,0 +1,77 @@
+﻿@using Business
+@using Entities
+
+<hr />
+<select class="form-control" @onchange="cambio_categoria">
+
+    <option value="x">-- Seleccione Valor --</option>
+    @foreach(var cate in categorias)
+    {
+        <option value="@cate.CategoryId">
+            @cate.CategoryName
+        </option>
+
+    }
+</select>
+<hr/>
+
+
+<table class="table table-hover table-bordered">
+    <thead>
+      <tr>
+          <th>Referencia</th>
+          <th>Nombre del Producto</th>
+          <th>Categoria</th>
+          <th>Actualizar</th>
+      </tr>
+    </thead>
+    <tbody>
+        @foreach(var pro in p2)
+        {
+            <tr>
+                <td>@pro.ProductId</td>
+                <td>@pro.ProductName</td>
+                <td>@pro.CategoryId</td>
+                <td><a href="product/update/@pro.ProductId">Editar</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+<p>
+    <label>
+        @mensa
+    </label>
+   
+</p>
+
+@inject B_Product bProduct
+@code {
+    List<ProductEntity> products = new List<ProductEntity>();
+    List<ProductEntity> p2 = new List<ProductEntity>();
+
+    List<CategoryEntity> categorias = new List<CategoryEntity>();
+    string mensa="";
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = bProduct.ItemList();
+        categorias = B_Category.ItemList();
+        p2 = products;
+    }
+
+    private void cambio_categoria(ChangeEventArgs e)
+    {
+        mensa = e.Value.ToString();
+
+        if (mensa.Equals("x"))
+        {
+            p2 = products;
+        } else
+        {
+            p2 = products.Where(c => c.CategoryId == mensa).ToList();//             .FindAll(x => x.CategoryId.Equals(mensa)).ToList();
+        }
+
+        mensa = $"Seleccionados {p2.Count} registros";
+        //products = products.FindAll(x => x.CategoryId.Equals(mensa)).ToList();
+    }
+}

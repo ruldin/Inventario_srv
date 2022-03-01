@@ -1,0 +1,62 @@
+﻿@using Business
+@using Entities
+
+@inject NavigationManager NavMan
+
+<div>
+    <EditForm Model="oProduct">
+        <div class="form-group">
+            <label>Referencia:</label>
+            <InputText @bind-Value ="oProduct.ProductId" class="form-control"></InputText>
+        </div>
+
+         <div class="form-group">
+            <label>Nombre del Producto:</label>
+            <InputText @bind-Value ="oProduct.ProductName" class="form-control"></InputText>
+        </div>
+
+         <div class="form-group">
+            <label>Descripcion del producto:</label>
+            <InputTextArea @bind-Value ="oProduct.ProductDescription" class="form-control"></InputTextArea>
+        </div>
+
+        <div class="form-group">
+            <label>Categoria:</label>
+            <InputSelect @bind-Value="oProduct.CategoryId" class="form-control">
+                @foreach(var cate in categorias)
+                {
+                    <option value="@cate.CategoryId">@cate.CategoryName</option>
+                }
+            </InputSelect>
+        </div>
+
+        <p>En este ejemplo se inyecta la dependencia, se usa el patron sigleton en program.cs</p>
+
+        <input type="button" value="Guardar" @onclick="SaveProduct" />
+
+    </EditForm>
+</div>
+
+
+@inject B_Product bProduct
+@code {
+    ProductEntity oProduct = new ProductEntity();
+    List<CategoryEntity> categorias = new List<CategoryEntity>();
+
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = B_Category.ItemList(); //esta no tiene inyeccion de dependencias
+    }
+
+
+    private void SaveProduct()
+    {
+        bProduct.CreateItem(oProduct);
+        NavMan.NavigateTo("productos/lista");
+    }
+
+}

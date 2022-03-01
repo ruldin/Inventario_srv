@@ -1,0 +1,113 @@
+﻿@using Entities
+@using Business
+@inject B_Warehouse bBodegas
+@inject B_Product b_prod
+
+// https://platzi.com/clases/1837-blazor/26534-revision-de-estilos-introduccion-a-bootstrap/
+
+
+<div class="form-group">
+    <select class="form-control" @onchange="OnChangeWarehouse">
+        <option value ="">Seleccione una Bodega...</option>
+        @foreach(var warehouse in almacenes)
+        {
+            <option value="@warehouse.WarehouseId">@warehouse.WarehouseName</option>
+        }
+
+
+    </select>
+</div>
+<hr />
+<EditForm Model="oInOut">
+    <div class="form-group">
+       <InputSelect class="form-control" @bind-Value ="oInOut.StorageId" @onchange="OnChangeWarehouse">
+            <option value ="">Seleccione una Producto...</option>
+                @foreach(var stor in storages)
+                {
+                    <option value="@stor.StorageId ">@stor.Product.ProductName </option>
+                }
+       </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label>Escriba la Cantidad</label>
+      <InputNumber class="form-control" @bind-Value="oInOut.Quantity"   />
+    </div>
+     <div class="form-group">
+      <label>Es una entrada? true /false </label>
+      <InputCheckbox  class="form-control" @bind-Value="oInOut.IsInput"   />
+    </div>
+    <br />
+    <input class="form-control"  type="button" value="@buttonValue" @onclick="SaveInOut"/>
+</EditForm>
+
+
+@code {
+    InputOutputEntity oInOut = new InputOutputEntity();
+
+    List<WarehouseEntity> almacenes = new List<WarehouseEntity>();
+    List<StorageEntity> storages = new List<StorageEntity>();
+
+    string buttonValue => oInOut.IsInput ? "Registrar Entrada" : "Regristre Salida";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        almacenes = bBodegas.ItemList();
+
+    }
+
+
+    private void SaveInOut()
+    {
+         var quantity = oInOut.Quantity;
+
+        var oStorage = storages.LastOrDefault(s => s.StorageId == oInOut.StorageId);
+        
+        var product = oStorage.Product;
+
+        if (!oInOut.IsInput)
+        {
+            //quantity = -1 * quantity;
+            if (IsBiggerThanZero(quantity, oStorage))
+            {
+                product.TotalQuantity = product.TotalQuantity - quantity;
+                oStorage.PartialQuantity = oStorage.PartialQuantity - quantity;
+            }
+
+            B_Storage.UpdateItem(oStorage);
+            b_prod.UpdateItem(product);
+        }
+        else
+        {
+            product.TotalQuantity = product.TotalQuantity + quantity;
+            oStorage.PartialQuantity = oStorage.PartialQuantity + quantity;
+
+            B_Storage.UpdateItem(oStorage);
+            b_prod.UpdateItem(product);
+        }
+    }
+
+
+
+    protected void OnChangeWarehouse(ChangeEventArgs e)
+    {
+        var idwarehouse = e.Value.ToString();
+        storages = B_Storage.StorageProductByWarehouse(idwarehouse);
+    }
+
+
+
+    private bool IsBiggerThanZero(int quantity, StorageEntity storage)
+    {
+        if (quantity < 0 && storage.PartialQuantity < quantity)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+
+}

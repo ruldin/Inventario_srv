@@ -1,0 +1,78 @@
+﻿@using Entities
+@using Business
+
+<EditForm model ="wareAll">
+    <label>Codigo del Almacen:</label>
+    <InputText @bind-Value = "wareAll.WarehouseId" @onblur="@( ()=> verifica(wareAll) )"  ></InputText>
+   
+    <label>Nombre del Almacen:</label>
+    <InputText @bind-Value = "wareAll.WarehouseName"></InputText>
+    
+    <label>Direccion del Almacen:</label>
+    <InputText @bind-Value = "wareAll.WarehouseAddress"></InputText>
+    
+    <p>
+        @msg
+    </p>
+    <p>
+        @stado
+    </p>
+    <div>
+        <input type="button" value ="Grabar" @onclick="Grabar"/>
+    </div>
+</EditForm>
+
+@inject B_Warehouse almacen
+@code {
+    String msg = "";
+    String stado = "";
+    WarehouseEntity wareAll = new WarehouseEntity();
+    List<WarehouseEntity> Todos = new List<WarehouseEntity>();
+    int tiene = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Todos = almacen.ItemList();
+
+    } 
+
+    public void Grabar()
+    {
+        if (tiene == 1)
+        {
+            tiene = 0;
+            almacen.UpdateItem(wareAll);
+            msg = "Actualizado!!";    
+        } else
+        {
+            //se crea un nuevo registro
+            almacen.CreateItem(wareAll);
+             msg = "Registro creado satisfactoriamente!!"; 
+        }
+
+    }
+
+    public void verifica(WarehouseEntity arg)
+    {
+        Todos = almacen.ItemList();
+        msg = $"llega!!! con  {arg.WarehouseId}";
+
+        var pivote = Todos.Find(x => x.WarehouseId.Equals(arg.WarehouseId.Trim()));
+
+        if (pivote is null)
+        {
+            stado = "NO HAY DATOS";
+            tiene = 0;
+        } else
+        {
+            tiene = 1;
+            wareAll = pivote;
+            stado = wareAll.WarehouseName;
+
+        }
+       
+    }
+
+
+}

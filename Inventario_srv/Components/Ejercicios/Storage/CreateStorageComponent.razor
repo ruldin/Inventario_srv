@@ -1,0 +1,85 @@
+﻿@using Entities
+@using Business
+@inject B_Warehouse bBodegas
+@inject B_Product bProducto
+
+
+<EditForm Model="oStorage">
+    <div class="form-group">
+        <label>Bodega:</label>
+        <InputSelect @bind-Value="oStorage.WarehouseId"  class="form-control">
+            <option value="">Seleccione Bodega...</option>
+
+            @foreach(var xx in bodegas)
+            {
+                <option value ="@xx.WarehouseId">@xx.WarehouseName</option>
+            }
+        </InputSelect>
+    </div>
+
+     <div class="form-group">
+        <label>Producto:</label>
+        <InputSelect @bind-Value="oStorage.ProductId"  class="form-control" @onblur="@(()=>limpia())">
+            <option value="">Seleccione Producto...</option>
+
+            @foreach(var xx in productos)
+            {
+                <option value ="@xx.ProductId">@xx.ProductName</option>
+            }
+        </InputSelect>
+    </div>
+
+    <input type="button" value ="Guardate Producto" @onclick="SaveStorage" />
+
+</EditForm>
+
+<div class="text-center h4">
+    @mensa
+</div>
+
+@code {
+    StorageEntity oStorage = new StorageEntity();
+    List<WarehouseEntity> bodegas = new List<WarehouseEntity>();
+    List<ProductEntity> productos = new List<ProductEntity>();
+    string mensa = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        bodegas = bBodegas.ItemList();
+        productos = bProducto.ItemList();
+
+    }
+
+    private void limpia()
+    {
+        mensa = "";
+    }
+
+
+    private void SaveStorage()
+    {
+        //solo un producto puede tener una bodega
+        // oStorage.StorageId = Guid.NewGuid().ToString(); //genera un codigo unico
+        oStorage.StorageId = "";
+        oStorage.StorageId = $"{oStorage.StorageId}-{oStorage.ProductId}";
+
+
+        if (B_Storage.IsProductInWarehouse(oStorage.StorageId))
+        {
+            mensa = "Ya existe este producto";
+
+        } else
+        {
+            //no existe, se puede registrar
+            oStorage.dateTime = DateTime.Now;
+            B_Storage.CreateItem(oStorage);
+            mensa = "Producto guardado";
+
+        }
+
+
+
+      
+    }
+
+}
